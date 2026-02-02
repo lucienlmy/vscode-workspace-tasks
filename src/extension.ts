@@ -11,6 +11,7 @@ import { FavoritesService } from './services/favoritesService';
 import { QueueService } from './services/queueService';
 import { FilteredTaskService } from './services/filteredTaskService';
 import { FilteredTaskDecorationProvider } from './filteredTaskDecorationProvider';
+import { TaskRunnerTool } from './tools/taskRunnerTool';
 import { loadCommands } from './commands/index';
 import { registerTaskProviders } from './providers/index';
 import { configuration } from './libs/configuration';
@@ -152,6 +153,9 @@ export async function activate(context: vscode.ExtensionContext) {
       // This fires when a task ends. No action required here; onDidEndTaskProcess handles status updates.
     }),
   );
+
+  // Register Language Model Tool
+  context.subscriptions.push(vscode.lm.registerTool('workspace-tasks-runner', new TaskRunnerTool()));
 }
 
 export function deactivate() {}

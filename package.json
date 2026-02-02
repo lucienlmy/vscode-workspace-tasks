@@ -68,7 +68,9 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguageModelTool:workspace-tasks-runner"
+  ],
   "main": "./dist/extension.js",
   "scripts": {
     "pretest": "npm run compile:tests && npm run compile:webpack && npm run lint",
@@ -125,6 +127,33 @@
     "yaml": "^2.8.2"
   },
   "contributes": {
+    "languageModelTools": [
+      {
+        "name": "workspace-tasks-runner",
+        "toolReferenceName": "workspace-task-runner",
+        "displayName": "Run Workspace Task",
+        "modelDescription": "Runs a workspace task by name with optional arguments.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "taskName": {
+              "type": "string",
+              "description": "The name of the task to run"
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Optional arguments to pass to the task"
+            }
+          },
+          "required": [
+            "taskName"
+          ]
+        }
+      }
+    ],
     "languages": [
       {
         "id": "tasksignore",

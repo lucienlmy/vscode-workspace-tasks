@@ -6,7 +6,10 @@
       "script": "watch",
       "problemMatcher": {
         "owner": "typescript",
-        "fileLocation": ["relative", "${workspaceFolder}"],
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
         "pattern": {
           "regexp": "^([^\\s].*)\\((\\d+|\\d+,\\d+|\\d+,\\d+,\\d+,\\d+)\\):\\s+(error|warning|info)\\s+(TS\\d+)\\s*:\\s*(.*)$",
           "file": 1,
@@ -36,6 +39,23 @@
       "script": "compile",
       "problemMatcher": "$ts-webpack",
       "group": "build",
+      "label": "npm: compile"
+    },
+    {
+      "type": "npm",
+      "fileName": "package.json",
+      "isDefault": false,
+      "name": "compile",
+      "path": "package.json",
+      "pathAbs": "d:\\Development\\projects\\vscode-workspace-tasks\\package.json",
+      "project": "vscode-workspace-tasks",
+      "script": "compile",
+      "scriptFile": false,
+      "takesArgs": false,
+      "taskFileId": "",
+      "taskItemId": "",
+      "te": true,
+      "problemMatcher": [],
       "label": "npm: compile"
     }
   ]

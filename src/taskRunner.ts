@@ -5,6 +5,9 @@ import { TaskStateManager, TaskStatus } from './taskStateManager';
 import { createTaskForItem } from './taskFactory';
 import { QueueService } from './services/queueService';
 import { configuration } from './libs/configuration';
+import { TaskTreeDataProvider } from './taskTreeDataProvider';
+import { TaskTypeFactory } from './taskTypeItems';
+import { TaskCacheService } from './services/taskCacheService';
 
 export class TaskRunner {
   private static instance: TaskRunner;
@@ -21,6 +24,19 @@ export class TaskRunner {
       TaskRunner.instance = new TaskRunner();
     }
     return TaskRunner.instance;
+  }
+
+  public async runTaskByName(taskName: string, args?: string[]): Promise<void> {
+    // Find the TaskItem by name
+    const taskCache = TaskCacheService.getInstance();
+    const matchingTasks = taskCache.getAllTasks().filter((task) => task.label === taskName);
+    if (matchingTasks.length === 0) {
+      return;
+    }
+
+    // For simplicity, run the first matching task
+    const taskItem = matchingTasks[0];
+    await this.runTask(taskItem, args ? args.join(' ') : undefined);
   }
 
   public async runTask(item: TaskItem, args?: string): Promise<void> {
@@ -115,7 +131,7 @@ export class TaskRunner {
     vscode.commands.executeCommand('workspaceTasks.refreshTree'); // Trigger refresh
 
     try {
-      const execution = await vscode.tasks.executeTask(task);
+      const execution = (await vscode.tasks.executeTask(task));
       TaskStateManager.getInstance().setExecution(id, execution);
     } catch (e) {
       console.error('[TaskRunner] executeTask failed:', e);
