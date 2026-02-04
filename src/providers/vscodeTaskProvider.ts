@@ -1,17 +1,60 @@
 import * as vscode from 'vscode';
-import { TaskProvider, BaseTaskProvider } from '../taskProvider';
+import { TaskProvider2, BaseTaskProvider2 } from '../taskProvider';
 import { TaskItem } from '../taskItem';
 import constants from '../libs/constants';
 import { TaskFilesService } from '../services/taskFilesService';
 import { TaskIconService } from '../services/taskIconService';
 import { FilteredTaskService } from '../services/filteredTaskService';
 
-export class VscodeTaskProvider extends BaseTaskProvider implements TaskProvider {
+export class VscodeTaskProvider extends BaseTaskProvider2 implements TaskProvider2 {
   constructor() {
     super('vscode', constants.GLOB_VSCODE);
   }
 
-  async getTasks(): Promise<TaskItem[]> {
+  public async provideTasks(token?: vscode.CancellationToken): Promise<vscode.Task[]> {
+    if (!this.enabled || (token && token.isCancellationRequested)) {
+      return [];
+    }
+    const resultingTasks: vscode.Task[] = [];
+    const taskItems = await this.getTasks();
+
+    // Use existing Visual Studio Code task defined in .vscode/tasks.json
+    const tasks = await vscode.tasks.fetchTasks({ type: 'workspace' });
+    for (const item of taskItems) {
+      if (token && token.isCancellationRequested) {
+        break;
+      }
+      const taskUri = item.taskFileUri;
+      const targetWorkspaceFolder = taskUri
+        ? vscode.workspace.getWorkspaceFolder(taskUri)
+        : undefined;
+
+      const found = tasks.find((t) => {
+        const nameMatch = t.name === item.label && t.source.toLowerCase() === 'workspace';
+        if (!nameMatch) {
+          return false;
+        }
+
+        // If we know the target workspace folder, ensure the task belongs to it
+        if (targetWorkspaceFolder && typeof t.scope === 'object' && 'uri' in t.scope) {
+          return t.scope.uri.toString() === targetWorkspaceFolder.uri.toString();
+        }
+
+        // If we don't know the folder, or the task has global/workspace scope, accepts it as fallback
+        return true;
+      });
+
+      if (found) {
+        found.definition['__id'] = item.id;
+        resultingTasks.push(found);
+      }
+      // return { task: found, cwd: undefined, native: true };
+
+    }
+    return resultingTasks;
+  }
+
+  public async getTasks(): Promise<TaskItem[]> {
     if (!this.enabled) {
       return [];
     }
